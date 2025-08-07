@@ -782,71 +782,36 @@
             }
             
             createBGM() {
-                try {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                } catch (e) {
-                    console.log('Web Audio API not supported');
-                    return;
-                }
+                // MP3ファイルでBGMを作成
+                this.bgMusic = new Audio('./bgm.mp3');
+                this.bgMusic.loop = true;
+                this.bgMusic.volume = 0.3; // 音量を30%に設定
+                
+                // エラーハンドリング
+                this.bgMusic.addEventListener('error', (e) => {
+                    console.log('BGM loading error:', e);
+                    console.log('BGMファイル ./bgm.mp3 が見つかりません');
+                });
+                
+                this.bgMusic.addEventListener('loadeddata', () => {
+                    console.log('BGM loaded successfully');
+                });
             }
             
             startBGM() {
-                if (!this.audioContext) return;
+                if (!this.bgMusic) return;
                 
-                // 楽しいメロディーのBGMを作成
-                this.playMelody();
+                // BGMを再生
+                this.bgMusic.play().catch(e => {
+                    console.log('BGM playback failed:', e);
+                    // ユーザー操作が必要な場合があるため、静かに失敗
+                });
             }
             
-            playMelody() {
-                if (!this.audioContext) return;
-                
-                // ド・レ・ミ・ファ・ソ・ラ・シ・ドのメロディー
-                const melody = [
-                    { note: 261.63, duration: 0.5 }, // ド
-                    { note: 293.66, duration: 0.5 }, // レ
-                    { note: 329.63, duration: 0.5 }, // ミ
-                    { note: 349.23, duration: 0.5 }, // ファ
-                    { note: 392.00, duration: 0.5 }, // ソ
-                    { note: 440.00, duration: 0.5 }, // ラ
-                    { note: 493.88, duration: 0.5 }, // シ
-                    { note: 523.25, duration: 1.0 }, // ド（高）
-                    { note: 0, duration: 0.5 },      // 休符
-                    { note: 392.00, duration: 0.5 }, // ソ
-                    { note: 329.63, duration: 0.5 }, // ミ
-                    { note: 261.63, duration: 1.0 }, // ド
-                    { note: 0, duration: 1.0 }       // 休符
-                ];
-                
-                let time = this.audioContext.currentTime;
-                
-                melody.forEach(({ note, duration }) => {
-                    if (note > 0) {
-                        const oscillator = this.audioContext.createOscillator();
-                        const gainNode = this.audioContext.createGain();
-                        
-                        oscillator.connect(gainNode);
-                        gainNode.connect(this.audioContext.destination);
-                        
-                        oscillator.frequency.setValueAtTime(note, time);
-                        oscillator.type = 'sine';
-                        
-                        gainNode.gain.setValueAtTime(0.1, time);
-                        gainNode.gain.linearRampToValueAtTime(0.05, time + duration);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, time + duration);
-                        
-                        oscillator.start(time);
-                        oscillator.stop(time + duration);
-                    }
-                    time += duration;
-                });
-                
-                // メロディーを繰り返し再生
-                if (this.gameActive) {
-                    setTimeout(() => {
-                        if (this.gameActive) {
-                            this.playMelody();
-                        }
-                    }, time * 1000);
+            stopBGM() {
+                if (this.bgMusic) {
+                    this.bgMusic.pause();
+                    this.bgMusic.currentTime = 0;
                 }
             }
         }
