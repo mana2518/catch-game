@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食べ物キャッチゲーム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 30%, #60A5FA 70%, #93C5FD 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            position: relative;
+        }
+
+        .sky-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.8;
+            animation: floatClouds linear infinite;
+        }
+
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+        }
+
+        .cloud1 {
+            width: 80px;
+            height: 40px;
+            top: 20%;
+            left: -100px;
+            animation-duration: 20s;
+        }
+
+        .cloud1::before {
+            top: -20px;
+            left: 10px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .cloud1::after {
+            top: -10px;
+            left: 40px;
+            width: 60px;
+            height: 40px;
+        }
+
+        .cloud2 {
+            width: 60px;
+            height: 30px;
+            top: 15%;
+            left: -80px;
+            animation-duration: 25s;
+        }
+
+        .cloud2::before {
+            top: -15px;
+            left: 8px;
+            width: 40px;
+            height: 40px;
+        }
+
+        .cloud2::after {
+            top: -8px;
+            left: 30px;
+            width: 45px;
+            height: 30px;
+        }
+
+        .cloud3 {
+            width: 100px;
+            height: 50px;
+            top: 30%;
+            left: -120px;
+            animation-duration: 30s;
+        }
+
+        .cloud3::before {
+            top: -25px;
+            left: 15px;
+            width: 60px;
+            height: 60px;
+        }
+
+        .cloud3::after {
+            top: -15px;
+            left: 50px;
+            width: 70px;
+            height: 45px;
+        }
+
+        @keyframes floatClouds {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(calc(100vw + 100px)); }
+        }
+
+        .bird {
+            position: absolute;
+            width: 35px;
+            height: 25px;
+            animation: flyBird linear infinite;
+        }
+
+        .bird1 {
+            top: 25%;
+            left: -50px;
+            animation-duration: 15s;
+        }
+
+        .bird2 {
+            top: 35%;
+            left: -30px;
+            animation-duration: 18s;
+        }
+
+        @keyframes flyBird {
+            0% { transform: translateX(-50px); }
+            100% { transform: translateX(calc(100vw + 50px)); }
+        }
+
+        .bird svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .food-item {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .food-item:hover {
+            transform: scale(1.1);
+        }
+
+        .food-item.caught {
+            animation: catchEffect 0.6s ease-out forwards;
+        }
+
+        @keyframes catchEffect {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+                filter: brightness(1) drop-shadow(0 0 0px rgba(255, 255, 255, 0)) hue-rotate(0deg);
+            }
+            15% {
+                transform: scale(1.3) rotate(45deg);
+                opacity: 1;
+                filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)) hue-rotate(30deg);
+            }
+            30% {
+                transform: scale(1.6) rotate(90deg);
+                opacity: 1;
+                filter: brightness(2) drop-shadow(0 0 20px rgba(255, 255, 255, 1)) hue-rotate(60deg);
+            }
+            45% {
+                transform: scale(1.8) rotate(135deg);
+                opacity: 0.9;
+                filter: brightness(2.5) drop-shadow(0 0 30px rgba(255, 215, 0, 1)) hue-rotate(90deg);
+            }
+            60% {
+                transform: scale(2) rotate(180deg);
+                opacity: 0.8;
+                filter: brightness(3) drop-shadow(0 0 40px rgba(255, 255, 255, 1)) hue-rotate(120deg);
+            }
+            75% {
+                transform: scale(1.5) rotate(225deg);
+                opacity: 0.5;
+                filter: brightness(3.5) drop-shadow(0 0 50px rgba(255, 215, 0, 1)) hue-rotate(180deg);
+            }
+            90% {
+                transform: scale(0.5) rotate(315deg);
+                opacity: 0.2;
+                filter: brightness(4) drop-shadow(0 0 60px rgba(255, 255, 255, 1)) hue-rotate(270deg);
+            }
+            100% {
+                transform: scale(0) rotate(360deg);
+                opacity: 0;
+                filter: brightness(0) drop-shadow(0 0 0px rgba(255, 255, 255, 0)) hue-rotate(360deg);
+            }
+        }
+
+        .food-item.caught::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 215, 0, 0.6) 30%, rgba(255, 105, 180, 0.4) 60%, transparent 100%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: explosionRing 0.8s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes explosionRing {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(4);
+                opacity: 0;
+            }
+        }
+
+        .sparkle-effect {
+            position: absolute;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #FFD700 0%, #FFF  50%, transparent 100%);
+            border-radius: 50%;
+            animation: sparkleAnimation 0.8s ease-out forwards;
+        }
+
+        @keyframes sparkleAnimation {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5) rotate(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes sparkleMove {
+            0% {
+                transform: translate(0, 0) scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(calc(var(--end-x) * 0.7), calc(var(--end-y) * 0.7)) scale(1.5) rotate(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(var(--end-x), var(--end-y)) scale(0.2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes starPop {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.5) rotate(180deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fallDown {
+            0% {
+                transform: translateY(-100px);
+            }
+            100% {
+                transform: translateY(calc(100vh + 100px));
+            }
+        }
+
+        .score-display {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            z-index: 100;
+        }
+
+        .start-button {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-button:hover {
+            background: #FF5252;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 30px;
+            border-radius: 20px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="sky-background">
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="cloud cloud3"></div>
+        
+        <div class="bird bird1">
+            <svg viewBox="0 0 35 25" xmlns="http://www.w3.org/2000/svg">
+                <!-- 体 -->
+                <ellipse cx="17" cy="15" rx="12" ry="8" fill="#FFD700"/>
+                <!-- 羽 -->
+                <path d="M3 12 Q7 8, 11 4 Q15 8, 19 4 Q23 8, 27 4 Q31 8, 32 12 Q28 16, 24 20 Q20 16, 16 20 Q12 16, 8 12 Q4 16, 3 12" fill="#FFA500"/>
+                <!-- 頭 -->
+                <circle cx="23" cy="12" r="6" fill="#FFD700"/>
+                <!-- 目 -->
+                <circle cx="25" cy="10" r="2" fill="#FFF"/>
+                <circle cx="25" cy="10" r="1.2" fill="#000"/>
+                <circle cx="25.5" cy="9.5" r="0.5" fill="#FFF"/>
+                <!-- くちばし -->
+                <path d="M29 12 Q31 12, 30 14 Q29 13, 29 12" fill="#FF6B35"/>
+                <!-- ほっぺ -->
+                <circle cx="27" cy="14" r="1.5" fill="#FFB6C1" opacity="0.6"/>
+            </svg>
+        </div>
+        
+        <div class="bird bird2">
+            <svg viewBox="0 0 35 25" xmlns="http://www.w3.org/2000/svg">
+                <!-- 体 -->
+                <ellipse cx="17" cy="15" rx="12" ry="8" fill="#87CEEB"/>
+                <!-- 羽 -->
+                <path d="M3 12 Q7 8, 11 4 Q15 8, 19 4 Q23 8, 27 4 Q31 8, 32 12 Q28 16, 24 20 Q20 16, 16 20 Q12 16, 8 12 Q4 16, 3 12" fill="#5F9EA0"/>
+                <!-- 頭 -->
+                <circle cx="23" cy="12" r="6" fill="#87CEEB"/>
+                <!-- 目 -->
+                <circle cx="25" cy="10" r="2" fill="#FFF"/>
+                <circle cx="25" cy="10" r="1.2" fill="#000"/>
+                <circle cx="25.5" cy="9.5" r="0.5" fill="#FFF"/>
+                <!-- くちばし -->
+                <path d="M29 12 Q31 12, 30 14 Q29 13, 29 12" fill="#FF6B35"/>
+                <!-- ほっぺ -->
+                <circle cx="27" cy="14" r="1.5" fill="#FFB6C1" opacity="0.6"/>
+            </svg>
+        </div>
+    </div>
+    
+    <div class="game-container" id="gameContainer">
+        <div class="score-display" id="scoreDisplay">スコア: 0</div>
+        
+        <button class="start-button" id="startButton">ゲーム開始</button>
+        
+        <div class="instructions" id="instructions">
+            食べ物をタッチしてキャッチしよう！
+        </div>
+    </div>
+
+    <script>
+        class CatchGame {
+            constructor() {
+                this.gameContainer = document.getElementById('gameContainer');
+                this.scoreDisplay = document.getElementById('scoreDisplay');
+                this.startButton = document.getElementById('startButton');
+                this.instructions = document.getElementById('instructions');
+                
+                this.score = 0;
+                this.gameActive = false;
+                this.foodItems = [];
+                this.spawnInterval = null;
+                this.gameSpeed = 2000; // 2秒間隔で食べ物を生成
+                this.bgMusic = null;
+                this.audioContext = null;
+                
+                // 食べ物のSVGデータ（子ども向け可愛いイラスト風）
+                this.foodTypes = [
+                    {
+                        name: 'apple',
+                        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="55" r="35" fill="#FF4444"/>
+                            <ellipse cx="42" cy="45" rx="10" ry="15" fill="#FF7777"/>
+                            <rect x="48" y="15" width="4" height="15" rx="2" fill="#8B4513"/>
+                            <ellipse cx="55" cy="18" rx="10" ry="6" fill="#228B22" transform="rotate(30 55 18)"/>
+                            <circle cx="40" cy="50" r="2" fill="#FFF"/>
+                            <circle cx="60" cy="60" r="1.5" fill="#FFF"/>
+                        </svg>`
+                    },
+                    {
+                        name: 'orange',
+                        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="35" fill="#FF8C00"/>
+                            <circle cx="45" cy="40" r="3" fill="#FFA500"/>
+                            <circle cx="60" cy="45" r="2" fill="#FFA500"/>
+                            <circle cx="55" cy="62" r="2.5" fill="#FFA500"/>
+                            <circle cx="40" cy="58" r="2" fill="#FFA500"/>
+                            <rect x="47" y="12" width="6" height="8" rx="3" fill="#228B22"/>
+                            <circle cx="40" cy="45" r="1.5" fill="#FFF"/>
+                            <circle cx="58" cy="55" r="1" fill="#FFF"/>
+                        </svg>`
+                    },
+                    {
+                        name: 'strawberry',
+                        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M50 80 Q30 75, 35 50 Q38 35, 42 30 Q46 25, 50 20 Q54 25, 58 30 Q62 35, 65 50 Q70 75, 50 80" fill="#DC143C"/>
+                            <path d="M42 30 Q46 20, 50 15 Q54 20, 58 30 Q55 25, 50 20 Q45 25, 42 30" fill="#228B22"/>
+                            <ellipse cx="47" cy="25" rx="3" ry="2" fill="#32CD32" transform="rotate(-20 47 25)"/>
+                            <ellipse cx="53" cy="25" rx="3" ry="2" fill="#32CD32" transform="rotate(20 53 25)"/>
+                            <ellipse cx="50" cy="22" rx="4" ry="2" fill="#32CD32"/>
+                            <circle cx="42" cy="40" r="1" fill="#8B0000"/>
+                            <circle cx="58" cy="45" r="1" fill="#8B0000"/>
+                            <circle cx="46" cy="50" r="1" fill="#8B0000"/>
+                            <circle cx="54" cy="55" r="1" fill="#8B0000"/>
+                            <circle cx="50" cy="60" r="1" fill="#8B0000"/>
+                            <circle cx="44" cy="65" r="1" fill="#8B0000"/>
+                            <circle cx="56" cy="65" r="1" fill="#8B0000"/>
+                            <circle cx="48" cy="70" r="1" fill="#8B0000"/>
+                            <circle cx="52" cy="72" r="1" fill="#8B0000"/>
+                        </svg>`
+                    },
+                    {
+                        name: 'pudding',
+                        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M30 45 Q30 75, 50 80 Q70 75, 70 45 L65 40 Q60 35, 50 35 Q40 35, 35 40 Z" fill="#F4A460"/>
+                            <ellipse cx="50" cy="40" rx="20" ry="8" fill="#8B4513"/>
+                            <ellipse cx="50" cy="38" rx="18" ry="6" fill="#D2691E"/>
+                            <circle cx="45" cy="55" r="2" fill="#DDD"/>
+                            <circle cx="55" cy="60" r="1.5" fill="#DDD"/>
+                            <ellipse cx="50" cy="35" rx="15" ry="5" fill="#FFE4B5"/>
+                        </svg>`
+                    },
+                    {
+                        name: 'chocolate',
+                        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="20" y="25" width="60" height="50" rx="6" fill="#8B4513"/>
+                            <rect x="25" y="30" width="23" height="18" fill="#A0522D"/>
+                            <rect x="52" y="30" width="23" height="18" fill="#A0522D"/>
+                            <rect x="25" y="52" width="23" height="18" fill="#A0522D"/>
+                            <rect x="52" y="52" width="23" height="18" fill="#A0522D"/>
+                            <rect x="22" y="27" width="56" height="46" rx="4" fill="none" stroke="#654321" stroke-width="2"/>
+                            <circle cx="36" cy="39" r="1.5" fill="#DDD"/>
+                            <circle cx="64" cy="61" r="1.5" fill="#DDD"/>
+                            <circle cx="36" cy="61" r="1.5" fill="#DDD"/>
+                            <circle cx="64" cy="39" r="1.5" fill="#DDD"/>
+                        </svg>`
+                    },
+                    {
+                        name: 'candy',
+                        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <!-- 棒 -->
+                            <rect x="48" y="55" width="4" height="35" fill="#FFFFFF"/>
+                            <rect x="48" y="55" width="4" height="35" fill="#FFB6C1" opacity="0.3"/>
+                            <!-- キャンディ部分 -->
+                            <circle cx="50" cy="40" r="20" fill="#FF69B4"/>
+                            <circle cx="50" cy="40" r="16" fill="#FFB6C1"/>
+                            <!-- 渦巻き模様 -->
+                            <path d="M50 24 Q42 32, 50 40 Q58 32, 50 40 Q42 48, 50 40" fill="none" stroke="#FF1493" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M35 40 Q42 33, 50 40 Q58 47, 65 40" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                            <!-- ハイライト -->
+                            <circle cx="45" cy="35" r="3" fill="#FFF" opacity="0.8"/>
+                            <circle cx="55" cy="45" r="2" fill="#FFF" opacity="0.6"/>
+                            <!-- 棒の先端 -->
+                            <rect x="47" y="88" width="6" height="4" rx="3" fill="#FFB6C1"/>
+                        </svg>`
+                    },
+                    {
+                        name: 'icecream',
+                        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <!-- コーンの外側 -->
+                            <path d="M35 85 L50 50 L65 85 Z" fill="#DEB887"/>
+                            <!-- コーンの内側（影） -->
+                            <path d="M37 83 L50 52 L63 83 Z" fill="#CD853F"/>
+                            <!-- コーンの格子模様 -->
+                            <path d="M42 75 L58 75 M44 80 L56 80 M46 85 L54 85" stroke="#8B7355" stroke-width="1"/>
+                            <path d="M45 70 L55 88 M50 68 L50 90 M55 70 L45 88" stroke="#8B7355" stroke-width="1"/>
+                            
+                            <!-- アイスクリーム3段 -->
+                            <!-- 下段（いちご） -->
+                            <circle cx="50" cy="55" r="18" fill="#FFB6C1"/>
+                            <circle cx="50" cy="55" r="15" fill="#FF69B4"/>
+                            <!-- 中段（バニラ） -->  
+                            <circle cx="50" cy="42" r="16" fill="#FFFAF0"/>
+                            <circle cx="50" cy="42" r="13" fill="#FFF8DC"/>
+                            <!-- 上段（チョコ） -->
+                            <circle cx="50" cy="30" r="14" fill="#D2691E"/>
+                            <circle cx="50" cy="30" r="11" fill="#8B4513"/>
+                            
+                            <!-- ソフトクリーム風の渦巻き -->
+                            <path d="M50 16 Q45 20, 50 25 Q55 30, 50 35 Q45 40, 50 45" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+                            
+                            <!-- ハイライト -->
+                            <circle cx="45" cy="52" r="3" fill="#FFF" opacity="0.6"/>
+                            <circle cx="55" cy="38" r="2.5" fill="#FFF" opacity="0.6"/>
+                            <circle cx="47" cy="27" r="2" fill="#FFF" opacity="0.6"/>
+                            
+                            <!-- チェリー -->
+                            <circle cx="45" cy="22" r="3" fill="#DC143C"/>
+                            <circle cx="45" cy="22" r="2" fill="#FF1493"/>
+                            <path d="M45 19 Q43 17, 45 15" stroke="#228B22" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>`
+                    },
+                    {
+                        name: 'bread',
+                        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="50" cy="55" rx="35" ry="25" fill="#DEB887"/>
+                            <ellipse cx="50" cy="50" rx="32" ry="20" fill="#F4A460"/>
+                            <ellipse cx="50" cy="45" rx="28" ry="15" fill="#FFE4B5"/>
+                            <circle cx="40" cy="50" r="2" fill="#D2B48C"/>
+                            <circle cx="60" cy="52" r="2" fill="#D2B48C"/>
+                            <circle cx="50" cy="58" r="1.5" fill="#D2B48C"/>
+                            <ellipse cx="45" cy="45" rx="8" ry="3" fill="#FFF"/>
+                            <ellipse cx="55" cy="48" rx="6" ry="2" fill="#FFF"/>
+                        </svg>`
+                    },
+                    {
+                        name: 'kakigori',
+                        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M35 75 Q35 70, 40 70 L60 70 Q65 70, 65 75 L65 80 Q65 85, 60 85 L40 85 Q35 85, 35 80 Z" fill="#FF69B4"/>
+                            <path d="M40 70 Q45 60, 50 50 Q48 45, 45 40 Q50 35, 55 40 Q52 45, 50 50 Q55 60, 60 70" fill="#E6F3FF"/>
+                            <path d="M42 65 Q47 55, 52 45 Q50 40, 48 35 Q52 30, 56 35 Q54 40, 52 45 Q57 55, 62 65" fill="#F0F8FF"/>
+                            <path d="M44 60 Q49 50, 54 40 Q52 35, 50 30 Q54 25, 58 30 Q56 35, 54 40 Q59 50, 64 60" fill="#FFFFFF"/>
+                            <circle cx="48" cy="45" r="1" fill="#87CEEB"/>
+                            <circle cx="52" cy="50" r="1" fill="#87CEEB"/>
+                            <circle cx="46" cy="55" r="1" fill="#87CEEB"/>
+                            <rect x="48" y="85" width="4" height="8" fill="#8B4513"/>
+                        </svg>`
+                    }
+                ];
+                
+                this.init();
+            }
+            
+            init() {
+                this.startButton.addEventListener('click', () => this.startGame());
+                
+                // 効果音用のAudio要素を作成
+                this.catchSound = new Audio();
+                this.catchSound.src = this.createBeepSound();
+                
+                // BGM作成
+                this.createBGM();
+            }
+            
+            // ビープ音を生成（パク！という感じの音）
+            createBeepSound() {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+                
+                return URL.createObjectURL(new Blob([''], { type: 'audio/wav' }));
+            }
+            
+            startGame() {
+                this.gameActive = true;
+                this.score = 0;
+                this.updateScore();
+                
+                this.startButton.style.display = 'none';
+                this.instructions.textContent = '食べ物をタッチしてね！';
+                
+                // BGM開始
+                this.startBGM();
+                
+                this.spawnInterval = setInterval(() => {
+                    this.spawnFood();
+                }, this.gameSpeed);
+                
+                // 最初の食べ物をすぐに生成
+                this.spawnFood();
+            }
+            
+            spawnFood() {
+                if (!this.gameActive) return;
+                
+                const foodType = this.foodTypes[Math.floor(Math.random() * this.foodTypes.length)];
+                const foodElement = document.createElement('div');
+                foodElement.className = 'food-item';
+                foodElement.innerHTML = foodType.svg;
+                
+                // ランダムな横位置
+                const x = Math.random() * (window.innerWidth - 80);
+                foodElement.style.left = x + 'px';
+                foodElement.style.top = '-100px';
+                
+                // 落下アニメーション
+                const fallDuration = 6000 + Math.random() * 3000; // 6-9秒で落下
+                foodElement.style.animation = `fallDown ${fallDuration}ms linear`;
+                
+                // タッチイベント
+                foodElement.addEventListener('click', (e) => this.catchFood(e, foodElement));
+                foodElement.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.catchFood(e, foodElement);
+                });
+                
+                this.gameContainer.appendChild(foodElement);
+                this.foodItems.push(foodElement);
+                
+                // 一定時間後に削除
+                setTimeout(() => {
+                    if (foodElement.parentNode) {
+                        foodElement.remove();
+                        this.foodItems = this.foodItems.filter(item => item !== foodElement);
+                    }
+                }, fallDuration + 1000);
+            }
+            
+            catchFood(event, foodElement) {
+                if (!this.gameActive) return;
+                
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // 効果音再生
+                this.playEatSound();
+                
+                // キラキラ効果を追加
+                this.createSparkleEffect(foodElement);
+                
+                // キャッチアニメーション
+                foodElement.classList.add('caught');
+                
+                // スコア加算
+                this.score += 10;
+                this.updateScore();
+                
+                // 要素を削除
+                setTimeout(() => {
+                    if (foodElement.parentNode) {
+                        foodElement.remove();
+                        this.foodItems = this.foodItems.filter(item => item !== foodElement);
+                    }
+                }, 600);
+            }
+            
+            createSparkleEffect(foodElement) {
+                const rect = foodElement.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                // 12個のキラキラを放射状に配置（より華やか）
+                for (let i = 0; i < 12; i++) {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'sparkle';
+                    
+                    const angle = (i * 30) * Math.PI / 180; // 30度ずつ
+                    const distance = 50 + Math.random() * 40; // ランダムな距離
+                    
+                    const startX = centerX + Math.cos(angle) * 15;
+                    const startY = centerY + Math.sin(angle) * 15;
+                    const endX = centerX + Math.cos(angle) * distance;
+                    const endY = centerY + Math.sin(angle) * distance;
+                    
+                    sparkle.style.left = startX + 'px';
+                    sparkle.style.top = startY + 'px';
+                    
+                    // ランダムな色のキラキラ
+                    const colors = ['#FFD700', '#FF69B4', '#00BFFF', '#FF6347', '#98FB98', '#DDA0DD'];
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    sparkle.style.background = `radial-gradient(circle, ${randomColor} 0%, #FFF 50%, transparent 100%)`;
+                    
+                    // サイズをランダムに
+                    const size = 6 + Math.random() * 8; // 6-14px
+                    sparkle.style.width = size + 'px';
+                    sparkle.style.height = size + 'px';
+                    
+                    // カスタムアニメーション
+                    sparkle.style.setProperty('--end-x', (endX - startX) + 'px');
+                    sparkle.style.setProperty('--end-y', (endY - startY) + 'px');
+                    
+                    const delay = Math.random() * 0.2; // 0-0.2秒の遅延
+                    sparkle.style.animationDelay = delay + 's';
+                    sparkle.style.animation = `sparkleMove 1s ease-out forwards`;
+                    
+                    document.body.appendChild(sparkle);
+                    
+                    // アニメーション後に削除
+                    setTimeout(() => {
+                        if (sparkle.parentNode) {
+                            sparkle.remove();
+                        }
+                    }, 1200);
+                }
+                
+                // 追加の爆発エフェクト用の星型キラキラ
+                for (let i = 0; i < 4; i++) {
+                    setTimeout(() => {
+                        const star = document.createElement('div');
+                        star.innerHTML = '✨';
+                        star.style.position = 'absolute';
+                        star.style.fontSize = (20 + Math.random() * 15) + 'px';
+                        star.style.left = (centerX - 10 + Math.random() * 20) + 'px';
+                        star.style.top = (centerY - 10 + Math.random() * 20) + 'px';
+                        star.style.pointerEvents = 'none';
+                        star.style.zIndex = '30';
+                        star.style.animation = 'starPop 0.8s ease-out forwards';
+                        
+                        document.body.appendChild(star);
+                        
+                        setTimeout(() => {
+                            if (star.parentNode) {
+                                star.remove();
+                            }
+                        }, 800);
+                    }, i * 100);
+                }
+            }
+            
+            playEatSound() {
+                // Web Audio APIで効果音を生成・再生
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // パク！という感じの音
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.05);
+                oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.1);
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.15);
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.15);
+            }
+            
+            updateScore() {
+                this.scoreDisplay.textContent = `スコア: ${this.score}`;
+            }
+            
+            createBGM() {
+                // GitHub Pagesでは外部音楽ファイルを使用しないため無効化
+                console.log('BGM機能は利用できません（デプロイ版）');
+                return;
+            }
+            
+            startBGM() {
+                if (!this.bgMusic) return;
+                
+                // BGMを再生
+                this.bgMusic.play().catch(e => {
+                    console.log('BGM playback failed:', e);
+                    // ユーザー操作が必要な場合があるため、静かに失敗
+                });
+            }
+            
+            stopBGM() {
+                if (this.bgMusic) {
+                    this.bgMusic.pause();
+                    this.bgMusic.currentTime = 0;
+                }
+            }
+        }
+        
+        // ゲーム開始
+        document.addEventListener('DOMContentLoaded', () => {
+            new CatchGame();
+        });
+        
+        // タッチイベントのデフォルト動作を防止
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.classList.contains('food-item')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+</html>
