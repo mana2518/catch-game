@@ -593,34 +593,10 @@
             init() {
                 this.startButton.addEventListener('click', () => this.startGame());
                 
-                // 効果音用のAudio要素を作成
-                this.catchSound = new Audio();
-                this.catchSound.src = this.createBeepSound();
-                
                 // BGM作成
                 this.createBGM();
             }
             
-            // ビープ音を生成（パク！という感じの音）
-            createBeepSound() {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
-                
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.1);
-                
-                return URL.createObjectURL(new Blob([''], { type: 'audio/wav' }));
-            }
             
             startGame() {
                 this.gameActive = true;
@@ -805,25 +781,71 @@
             }
             
             createBGM() {
-                // GitHub Pagesでは外部音楽ファイルを使用しないため無効化
-                console.log('BGM機能は利用できません（デプロイ版）');
-                return;
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                    return;
+                }
             }
             
             startBGM() {
-                if (!this.bgMusic) return;
+                if (!this.audioContext) return;
                 
-                // BGMを再生
-                this.bgMusic.play().catch(e => {
-                    console.log('BGM playback failed:', e);
-                    // ユーザー操作が必要な場合があるため、静かに失敗
-                });
+                // 楽しいメロディーのBGMを作成
+                this.playMelody();
             }
             
-            stopBGM() {
-                if (this.bgMusic) {
-                    this.bgMusic.pause();
-                    this.bgMusic.currentTime = 0;
+            playMelody() {
+                if (!this.audioContext) return;
+                
+                // ド・レ・ミ・ファ・ソ・ラ・シ・ドのメロディー
+                const melody = [
+                    { note: 261.63, duration: 0.5 }, // ド
+                    { note: 293.66, duration: 0.5 }, // レ
+                    { note: 329.63, duration: 0.5 }, // ミ
+                    { note: 349.23, duration: 0.5 }, // ファ
+                    { note: 392.00, duration: 0.5 }, // ソ
+                    { note: 440.00, duration: 0.5 }, // ラ
+                    { note: 493.88, duration: 0.5 }, // シ
+                    { note: 523.25, duration: 1.0 }, // ド（高）
+                    { note: 0, duration: 0.5 },      // 休符
+                    { note: 392.00, duration: 0.5 }, // ソ
+                    { note: 329.63, duration: 0.5 }, // ミ
+                    { note: 261.63, duration: 1.0 }, // ド
+                    { note: 0, duration: 1.0 }       // 休符
+                ];
+                
+                let time = this.audioContext.currentTime;
+                
+                melody.forEach(({ note, duration }) => {
+                    if (note > 0) {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(note, time);
+                        oscillator.type = 'sine';
+                        
+                        gainNode.gain.setValueAtTime(0.1, time);
+                        gainNode.gain.linearRampToValueAtTime(0.05, time + duration);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, time + duration);
+                        
+                        oscillator.start(time);
+                        oscillator.stop(time + duration);
+                    }
+                    time += duration;
+                });
+                
+                // メロディーを繰り返し再生
+                if (this.gameActive) {
+                    setTimeout(() => {
+                        if (this.gameActive) {
+                            this.playMelody();
+                        }
+                    }, time * 1000);
                 }
             }
         }
